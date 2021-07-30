@@ -13,6 +13,7 @@ use PhpParser\Node\Stmt\Function_;
 use PhpParser\Node\Stmt\Return_;
 use PhpParser\Parser;
 use PhpParser\PrettyPrinter\Standard as StandardPrettyPrinter;
+use PHPStan\BetterReflection\BetterReflection;
 use PHPStan\BetterReflection\Reflection\Exception\Uncloneable;
 use PHPStan\BetterReflection\Reflection\ReflectionFunction;
 use PHPStan\BetterReflection\Reflection\ReflectionFunctionAbstract;
@@ -22,7 +23,9 @@ use PHPStan\BetterReflection\Reflector\ClassReflector;
 use PHPStan\BetterReflection\Reflector\FunctionReflector;
 use PHPStan\BetterReflection\SourceLocator\Ast\Locator;
 use PHPStan\BetterReflection\SourceLocator\Located\LocatedSource;
+use PHPStan\BetterReflection\SourceLocator\SourceStubber\PhpStormStubsSourceStubber;
 use PHPStan\BetterReflection\SourceLocator\Type\ClosureSourceLocator;
+use PHPStan\BetterReflection\SourceLocator\Type\PhpInternalSourceLocator;
 use PHPStan\BetterReflection\SourceLocator\Type\SingleFileSourceLocator;
 use PHPStan\BetterReflection\SourceLocator\Type\StringSourceLocator;
 use PHPUnit\Framework\TestCase;
@@ -130,6 +133,17 @@ class ReflectionFunctionAbstractTest extends TestCase
         $reflector = new FunctionReflector(new StringSourceLocator($php, $this->astLocator), $this->classReflector);
         $function  = $reflector->reflect('foo');
 
+        self::assertFalse($function->isDeprecated());
+    }
+
+    public function testStubbedIsDeprecated(): void
+    {
+        $reflector = new FunctionReflector(new PhpInternalSourceLocator($this->astLocator, new PhpStormStubsSourceStubber($this->parser)), $this->classReflector);
+        $function  = $reflector->reflect('create_function');
+        self::assertTrue($function->isDeprecated());
+
+        BetterReflection::$phpVersion = 70100;
+        $function  = $reflector->reflect('create_function');
         self::assertFalse($function->isDeprecated());
     }
 
