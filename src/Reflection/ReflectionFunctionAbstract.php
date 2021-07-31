@@ -290,10 +290,7 @@ abstract class ReflectionFunctionAbstract
                 if (isset($attributeArgs['since'])) {
                     // Convert version string to PHP_VERSION_ID equivalent.
                     [$phpMajor, $phpMinor] = explode('.', $attributeArgs['since']);
-                    $phpMajor = (int) str_pad($phpMajor, 2, '0');
-                    $phpMinor = (int) str_pad($phpMinor, 2, '0');
-                    $phpPatch = 00;
-                    $phpVersionId = (int) ($phpMajor.$phpMinor.$phpPatch);
+                    $phpVersionId = sprintf('%02d%02d00', $phpMajor, $phpMinor)
 
                     return BetterReflection::$phpVersion > $phpVersionId;
                 }
