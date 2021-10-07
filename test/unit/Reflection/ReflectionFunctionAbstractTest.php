@@ -138,12 +138,20 @@ class ReflectionFunctionAbstractTest extends TestCase
 
     public function testStubbedIsDeprecated(): void
     {
-        $reflector = new FunctionReflector(new PhpInternalSourceLocator($this->astLocator, new PhpStormStubsSourceStubber($this->parser)), $this->classReflector);
-        $function  = $reflector->reflect('create_function');
+        BetterReflection::$phpVersion = 70400;
+        $reflector = new FunctionReflector(
+            new PhpInternalSourceLocator($this->astLocator, new PhpStormStubsSourceStubber($this->parser, BetterReflection::$phpVersion)),
+            $this->classReflector
+        );
+        $function = $reflector->reflect('create_function');
         self::assertTrue($function->isDeprecated());
 
         BetterReflection::$phpVersion = 70100;
-        $function  = $reflector->reflect('create_function');
+        $reflector = new FunctionReflector(
+            new PhpInternalSourceLocator($this->astLocator, new PhpStormStubsSourceStubber($this->parser, BetterReflection::$phpVersion)),
+            $this->classReflector
+        );
+        $function = $reflector->reflect('create_function');
         self::assertFalse($function->isDeprecated());
     }
 
