@@ -29,6 +29,7 @@ use PHPStan\BetterReflection\SourceLocator\Located\LocatedSource;
 use PHPStan\BetterReflection\SourceLocator\Type\ClosureSourceLocator;
 use PHPStan\BetterReflection\Util\CalculateReflectionColum;
 use PHPStan\BetterReflection\Util\GetLastDocComment;
+use PHPStan\BetterReflection\Util\PhpIdParser;
 use PHPStan\BetterReflection\Util\Visitor\ReturnNodeVisitor;
 use function array_filter;
 use function assert;
@@ -286,11 +287,8 @@ abstract class ReflectionFunctionAbstract
             if ($attribute->getName() === 'JetBrains\PhpStorm\Deprecated') {
                 $attributeArgs = $attribute->getArguments();
                 if (isset($attributeArgs['since'])) {
-                    // Convert version string to PHP_VERSION_ID equivalent.
-                    [$phpMajor, $phpMinor] = explode('.', $attributeArgs['since']);
-                    $phpVersionId = sprintf('%02d%02d00', $phpMajor, $phpMinor)
-
-                    return BetterReflection::$phpVersion > $phpVersionId;
+                    $sinceId = PhpIdParser::fromVersion($attributeArgs['since']);
+                    return BetterReflection::$phpVersion >= $sinceId;
                 }
                 return true;
             }

@@ -19,6 +19,7 @@ use PHPStan\BetterReflection\Reflection\Exception\InvalidConstantNode;
 use PHPStan\BetterReflection\SourceLocator\FileChecker;
 use PHPStan\BetterReflection\SourceLocator\SourceStubber\Exception\CouldNotFindPhpStormStubs;
 use PHPStan\BetterReflection\Util\ConstantNodeChecker;
+use PHPStan\BetterReflection\Util\PhpIdParser;
 use Traversable;
 use function array_change_key_case;
 use function array_key_exists;
@@ -398,9 +399,7 @@ final class PhpStormStubsSourceStubber implements SourceStubber
 
         $sinceResult = preg_match('#@since\s+(\d+\.\d+(?:\.\d+)?)#', $docComment->getText(), $sinceMatches);
         if ($sinceResult) {
-            $since      = $sinceMatches[1];
-            $sinceParts = explode('.', $since);
-            $sinceId    = $sinceParts[0] * 10000 + $sinceParts[1] * 100 + ($sinceParts[2] ?? 0);
+            $sinceId    = PhpIdParser::fromVersion($sinceMatches[1]);
 
             if ($sinceId > $this->phpVersionId) {
                 return true;
@@ -409,9 +408,7 @@ final class PhpStormStubsSourceStubber implements SourceStubber
 
         $removedResult = preg_match('#@removed\s+(\d+\.\d+(?:\.\d+)?)#', $docComment->getText(), $removedMatches);
         if ($removedResult) {
-            $removed      = $removedMatches[1];
-            $removedParts = explode('.', $removed);
-            $removedId    = $removedParts[0] * 10000 + $removedParts[1] * 100 + ($removedParts[2] ?? 0);
+            $removedId    = PhpIdParser::fromVersion($removedMatches[1]);
 
             return $removedId <= $this->phpVersionId;
         }
