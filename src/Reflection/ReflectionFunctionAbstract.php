@@ -6,7 +6,6 @@ namespace PHPStan\BetterReflection\Reflection;
 
 use Closure;
 use LogicException;
-use phpDocumentor\Reflection\DocBlockFactory;
 use PhpParser\Comment\Doc;
 use PhpParser\Node;
 use PhpParser\Node\Expr\Yield_ as YieldNode;
@@ -277,9 +276,8 @@ abstract class ReflectionFunctionAbstract
     {
         $docComment = $this->getDocComment();
         if ($docComment !== '') {
-            $docBlockFactory = DocBlockFactory::createInstance();
-            $docBlock = $docBlockFactory->create($docComment);
-            if ($docBlock->hasTag('deprecated')) {
+            $deprecatedTag = preg_match('#@deprecated\s+(\d+\.\d+(?:\.\d+)?)#', $docComment, $deprecatedTagMatches);
+            if ($deprecatedTag) {
                 return true;
             }
         }
