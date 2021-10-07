@@ -279,7 +279,8 @@ abstract class ReflectionFunctionAbstract
         if ($docComment !== '') {
             $deprecatedTag = preg_match('#@deprecated\s+(\d+\.\d+(?:\.\d+)?)#', $docComment, $deprecatedTagMatches);
             if ($deprecatedTag) {
-                return true;
+                $sinceId = PhpIdParser::fromVersion($deprecatedTagMatches[1]);
+                return BetterReflection::$phpVersion >= $sinceId;
             }
         }
 

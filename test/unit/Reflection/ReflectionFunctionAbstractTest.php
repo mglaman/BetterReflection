@@ -136,23 +136,28 @@ class ReflectionFunctionAbstractTest extends TestCase
         self::assertFalse($function->isDeprecated());
     }
 
-    public function testStubbedIsDeprecated(): void
+    public function deprecatedStubProvider(): array
     {
-        BetterReflection::$phpVersion = 70400;
-        $reflector = new FunctionReflector(
-            new PhpInternalSourceLocator($this->astLocator, new PhpStormStubsSourceStubber($this->parser, BetterReflection::$phpVersion)),
-            $this->classReflector
-        );
-        $function = $reflector->reflect('create_function');
-        self::assertTrue($function->isDeprecated());
+        return [
+            ['create_function', 70400, true],
+            ['create_function', 70100, false],
+            ['zip_open', 70400, false],
+            ['zip_open', 80000, true],
+        ];
+    }
 
-        BetterReflection::$phpVersion = 70100;
+    /**
+     * @dataProvider deprecatedStubProvider
+     */
+    public function testStubbedIsDeprecated(string $functionName, int $phpVersionId, bool $expectedDeprecated): void
+    {
+        BetterReflection::$phpVersion = $phpVersionId;
         $reflector = new FunctionReflector(
             new PhpInternalSourceLocator($this->astLocator, new PhpStormStubsSourceStubber($this->parser, BetterReflection::$phpVersion)),
             $this->classReflector
         );
-        $function = $reflector->reflect('create_function');
-        self::assertFalse($function->isDeprecated());
+        $function = $reflector->reflect($functionName);
+        self::assertEquals($expectedDeprecated, $function->isDeprecated());
     }
 
     public function testIsInternal() : void
