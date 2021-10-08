@@ -62,6 +62,11 @@ class ReflectionFunctionAbstractTest extends TestCase
         $this->astLocator     = $configuration->astLocator();
     }
 
+    public function tearDown() : void
+    {
+        BetterReflection::$phpVersion = PHP_VERSION_ID;
+    }
+
     public function testNameMethodsWithNamespace() : void
     {
         $php = '<?php namespace Foo { function bar() {}}';
